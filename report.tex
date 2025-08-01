@@ -1,0 +1,235 @@
+% -*- coding: UTF-8; -*-
+%ne pas modifier ou enlever la ligne ci-haut
+\documentclass[11pt,letterpaper]{article}
+
+%Document préparé par David Lafrenière, pour le cours PHY1234.
+
+%Pour langue et caractères spéciaux
+%\usepackage[french]{babel} 
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage{siunitx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{braket}
+%\usepackage[french]{babel} 
+%Pour ajuster les marges
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+%pour inclure des graphiques
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+
+%Pour inclure des adresse web
+\usepackage{url}
+
+\usepackage{soul, color}
+
+%Pour deux colonnes
+%\usepackage{multicol}
+
+%pour le résumé
+\usepackage{abstract}
+	\renewcommand{\abstractnamefont}{\normalfont\bfseries}
+	\renewcommand{\abstracttextfont}{\normalfont\itshape}
+
+%pour inclure les codes en annexe
+\usepackage{fancyvrb}
+\usepackage{listingsutf8}
+\usepackage{color}
+\lstset{inputencoding=utf8/latin1,numbers=left,numberstyle=\footnotesize,frame=single,commentstyle=\it\color{blue},keywordstyle=\bf\color{red}}
+
+\usepackage{abstract}
+	\renewcommand{\abstractnamefont}{\normalfont\bfseries}
+	\renewcommand{\abstracttextfont}{\normalfont\itshape}
+
+
+\usepackage{dirtree}
+
+\usepackage[
+backend=biber,
+style=authoryear,
+sorting=nyt
+]{biblatex}
+\addbibresource{coma.bib}
+
+%Page titre
+\title{\textbf{Data Reduction and Imaging of P-Band and L-Band VLA Observations of the Coma Cluster}}
+\author{
+    Elio Desbiens, \textit{Physics Department, Université de Montréal}\\
+}
+\date{\today}
+
+\begin{document}
+
+%\twocolumn[
+\maketitle
+
+
+\begin{onecolabstract}
+%Ce projet a pour but de ... \\
+This document is a report of the work I did during the summer 2025. It presents the data structure of the files I worked with, with details on the name of certain files and folders. Then, it presents the completed work and the remaining work for data reduction and imaging. The last section is on some spectral index analysis. 
+%\par nous donner une bonne note :)
+
+\noindent 
+
+\vspace{4mm} %
+\end{onecolabstract}
+%]
+\section{Data}
+The data is organized in frequency bands, then configuration and finally the date of the observation. For instance, \verb|coma-pband/barray/07.04| corresponds to the P-band data taken in B configuration on the 4th of July 2020. Each of these directories have a calibration subdirectory with all the calibration tables, a self-calibration subdirectory called \verb|selfcal|, and a subdirectory for the images created through the self-calibration cycles called \verb|selfcal_images|. To have the original measurement set (MS), one can download it from the \href{https://data.nrao.edu/portal/#/}{NRAO archive} by searching the name of the project "Imaging the coma cluster of galaxies with the JVLA". The commands I used to download the data can be found in the README file. The aforementioned directories can be found in \verb|/rds/user/ed718/hpc-work/|.
+\medskip
+\par Here is a breakdown of every directory.
+
+\dirtree{%
+.1 /.
+.2 coma-lband \DTcomment{This directory contains all content associated to L-band data.}.
+.3 carray \DTcomment{This is the data taken in the C-configuration.}.
+.4 02.25.
+.5 coma\_lbandC2.ms \DTcomment{This is the calibrated data for the target only.}.
+.5 selfcal \DTcomment{This directory contains the self-calibration gain tables.}.
+.6 gains\_cycle\_9.cal \DTcomment{This is the last phase calibration table.}.
+.6 gains\_cycle\_12.cal \DTcomment{This is the last amplitude calibration table.}.
+.5 selfcal\_images \DTcomment{This directory contains the self-calibration images.}.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-lband/carray/02.25/lbandC0225_selfcal.py}{lbandC0225\_selfcal.py} \DTcomment{Non-interactive script used for the self-calibration of this data.}.
+.4 03.09.
+.5 coma\_pipcorrected.ms \DTcomment{This is the calibrated data for the target only.}.
+.5 selfcal.
+.6 coma\_pip.ScG10 \DTcomment{This is the last phase calibration table.}.
+.6 coma\_pip.ScG14\_amp \DTcomment{This is the last amplitude calibration table.}.
+.6 coma\_pip.ScG15\_b \DTcomment{This is the bandpass calibration table.}.
+.6 baseline.cal \DTcomment{This is the baseline calibration table. It doesn't improve the image.}.
+.5 selfcal\_images.
+.5 coma\_lbandC0309\_alpha-MFS-*.fits \DTcomment{Final images. See next section for details.}.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-lband/carray/03.09/lbandC0309_selfcal.py}{lbandC0309\_selfcal.py} \DTcomment{Script used for the self-calibration.}.
+.3 darray \DTcomment{Empty.}.
+.2 coma-pband \DTcomment{This directory contains all content associated to P-band data.}.
+.3 barray.
+.4 07.04.
+.5 coma\_pbandB1\_hanning.ms \DTcomment{This is the calibrated data for the target only.}.
+.5 calibration \DTcomment{This directory contains all the tables used during the calibration.}.
+.5 selfcal.
+.6 gains\_cycle\_8.cal \DTcomment{This is a phase calibration table with solint=10s.}.
+.5 selfcal\_images.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-pband/barray/07.04/pbandB0704_calibration.py}{pbandB0704\_calibration.py} \DTcomment{Script used for the calibration and self-calibration of this data.}.
+.5 pbandB0704\_selfcal.py \DTcomment{Unused draft for non-interactive self-calibration.}.
+.4 07.05.
+.5 coma\_pbandB2\_hanning.ms \DTcomment{This is the calibrated data for the target only.}.
+.5 calibration.
+.5 selfcal.
+.6 gains\_cycle\_8.cal \DTcomment{Last table before creating image coma\_pbandB0704\_alpha with solint=int. This is a phase table.}.
+.6 gains\_cycle\_10.cal \DTcomment{This is an amplitude calibration table with solint=100s.}.
+.5 selfcal\_images.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-pband/barray/07.05/pbandB0705_calibration.py}{pbandB0705\_calibration.py} \DTcomment{Script used for the calibration and self-calibration of this data.}.
+.5 coma\_pbandB0704\_alpha-MFS-*.fits \DTcomment{Final images. See next section for details. The name has the date 0704 in it -- this is an error I made, it should be 0705.}.
+.3 carray.
+.4 02.18.
+.5 coma\_pbandC1\_hanning\_target.ms \DTcomment{This is the calibrated data for the target only, coming from the first calibration.}.
+.5 calibration\_first \DTcomment{This directory contains the table used for a full first try at calibration. The MS coma\_pbandC1\_hanning.ms comes from applying hanningsmooth() on the original MS.}.
+.5 calibration\_second \DTcomment{This directory contains the calibration tables for the beginning of a second try at calibration. The MS pbandC1\_hanning.ms comes from applying hanningsmooth() on the original MS.}.
+.5 selfcal.
+.5 selfcal\_images.
+.2 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/README.md}{README.md}.
+.2 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/spectral_image.py}{spectral\_image.py} \DTcomment{Python script to create spectral index images.}.
+}
+
+
+\section{Data Reduction \& Imaging: Completed and Remaining Work} \label{sec:data-reduction}
+\par After going through two tutorials for the calibration of \href{https://casaguides.nrao.edu/index.php/VLA_Continuum_Tutorial_3C391-CASA6.4.1}{C-band data}, and of \href{https://casaguides.nrao.edu/index.php/VLA_Radio_galaxy_3C_129:_P-band_continuum_tutorial-CASA6.4.1}{P-band data}, as well as reading through an \href{https://casaguides.nrao.edu/index.php/First_Look_at_Self_Calibration_CASA_6.5.4}{introduction to self-calibration}, a \href{https://casaguides.nrao.edu/index.php/VLA_Self-calibration_Tutorial-CASA5.7.0}{tutorial on self-calibration}, and a \href{https://casaguides.nrao.edu/index.php/VLA_Flagging_Intro_Tutorial#RFlag}{flagging tutorial}, I tried to calibrate the L-band data taken in C configuration on 2020-03-09. My first try at calibration was less good than the data calibrated with the VLA calibration pipeline for L-band, so to save some time, we decided to continue with the pipeline calibrated measurement set. The following subsections present what I did and the links to the scripts can be found in the previous section.  % ajouter commentaires dans les scripts pour dire quand flagger interactivement.
+
+\subsection{L-band C-configuration: 2020-03-09}
+\begin{itemize}
+    \item Directory: \verb|./coma-lband/carray/03.09/|
+    \item Calibration: The VLA calibration pipeline is a good and efficient way of having a calibrated measurement set.
+    \item Self-calibration: I followed standard self-calibration steps, namely cycles of cleaning with WSClean and applying phase solutions with decreasing solution intervals, before doing the same thing for amplitude calibrations. One round of bandpass calibration was also made and it improved the image, especially close to the target source. Baseline calibration doesn't improve the image.
+    \item Final image: Size 5100 x 5100, scale 2 arcsec, beam size 9 arcsec. The command used can be found in the self-calibration script. See figure \ref{fig:lbandC0309}.
+    \item \textbf{Remaining work}: Try imaging with natural weighting, change uv range, play with parameters to see if they can make better images.
+\end{itemize}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{lbandC0309_close.png}
+    \caption{Zoomed image of the Coma cluster in L-band C-configuration after self-calibration. The expected noise level is about 17 $\mu$Jy. The recorded rms in a background region here is about 8 $\mu$Jy.}
+    \label{fig:lbandC0309}
+\end{figure}
+
+\subsection{L-band C-configuration: 2020-02-25}
+\begin{itemize}
+    \item Directory: \verb|./coma-lband/carray/02.25/|
+    \item Calibration: VLA calibration pipeline.
+    \item Self-calibration: I wrote a script to run the self-calibration non-interactively. I did a round of flagdata() in rflag mode between cycle 8 and cycle 9. As of 2025-07-31, the self-calibration is not done.
+    \item Final image: Size 5100 x 5100, scale 2 arcsec, beam size 9 arcsec. The command used can be found in the self-calibration script.
+    \item \textbf{Remaining work}: Finish self-calibration and combine with the other epoch. As of August 1st, 2025, bandpass calibration should be done, but I didn't look at the image. 
+\end{itemize}
+
+\subsection{L-band D-configuration}
+\begin{itemize}
+    \item Directory: \verb|./coma-lband/darray/|
+    \item \textbf{Remaining work}: Download the data, do calibration and self-calibration.
+\end{itemize}
+
+\subsection{P-band B-configuration: 2020-07-04 and 2020-07-05}
+\begin{itemize}
+    \item Directory: \verb|./coma-pband/barray/07.04/| or \verb|./coma-pband/barray/07.05/|
+    \item Calibration: See previous section for the scripts. Most of the commands can be done non-interactively, except in some places where I did some interactive flagging. I put some comments in the scripts to indicate where, just search keyword "interactive".
+    \item Self-calibration: Same script as calibration.
+    \item Final image: Size 5100 x 5100, scale 2 arcsec, beam size 9 arcsec for 2020-07-05. This image still needs a lot of work and closer inspection.
+    \item \textbf{Remaining work}: A closer look at the calibration tables for 07.05 show that even the first one have some outliers and as the solution intervals become smaller, the solutions don't improve. This probably shows some problem with the calibration and inspection of the data is required. Similar problems can be observed in the 07.04 epoch. Once the bad data is identified, it would probably be better to start the self-calibration process from the beginning. 
+\end{itemize}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{pbandB0704.png}
+    \caption{Image of the Coma cluster in P-band B-configuration (2020-07-04) after 8 cycles of self-calibration. The expected noise level is around 110 $\mu$Jy. The recorded rms in a background region here is about 16 $\mu$Jy.}
+    \label{fig:lbandC0309}
+\end{figure}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{pbandB0705.png}
+    \caption{Image of the Coma cluster in P-band B-configuration (2020-07-05) after 9 cycles of self-calibration and another imaging cycle to match the same parameters as L-band C-configuration. The expected noise level is around 110 $\mu$Jy. The recorded rms in a background region here is about 20 $\mu$Jy.}
+    \label{fig:lbandC0309}
+\end{figure}
+
+
+\subsection{P-band C-configuration: 2020-02-18}
+\begin{itemize}
+    \item Directory: \verb|./coma-pband/carray/02.18/|
+    \item Calibration: The calibration steps used for this data are similar to those of the B-configuration. At first, I followed the calibration steps from the \href{https://casaguides.nrao.edu/index.php/VLA_Radio_galaxy_3C_129:_P-band_continuum_tutorial-CASA6.4.1}{P-band tutorial}, and the resulting tables can be found in the directory \verb|calibration_first|. I then started some self-calibration, but was not satisfied with the results. Therefore, I started over the calibration process, which can be found in \verb|calibration_second|. I did not finish it to be able to work on the B-configuration data, and sadly I lost the script which had the commands I used. 
+    \item The first image created showed that the source on the lower right (Coma A) is a lot brighter than the other sources and introduces a lot of noise. The deconvolution was not properly done around this source, so we decided to try adding the parameter -dd-psf-grid to the WSClean command, but I don't think it improved much. See figure \ref{fig:pbandC0218}.
+    \item Self-calibration: Did not finish self-calibration to be able to focus more on the B-configuration which is of similar resolution than L-band in C configuration.
+    \item \textbf{Remaining work}: Finish self-calibration and try to do continuum subtraction for the bright source (Coma A). If continuum subtraction helps considerably the quality of the data, do this for B-configuration. Calibrate and self-calibrate the other epoch.
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{pbandC0218.png}
+    \caption{Image of the Coma cluster in P-band C-configuration after the sixth cycle of self-calibration. The expected noise level is about 370$\mu$Jy, rms of about 30 $\mu$Jy.}
+    \label{fig:pbandC0218}
+\end{figure}
+
+\section{Spectral Index Analysis}
+With two good images for L-band and P-band (one for each) at the same resolution and with the same beam size, we can create a spectral index image. Knowing that
+\begin{equation}
+    \frac{S_1}{S_2} = \left(\frac{\nu_1}{\nu_2}\right)^{\alpha},
+\end{equation}
+we can take the logarithm of both sides of the equation and isolate $\alpha$.
+\begin{equation}
+    \alpha = \frac{\log \left(\frac{S_1}{S_2}\right)}{\log \left(\frac{\nu_1}{\nu_2}\right)}
+\end{equation}
+Therefore, with Astropy, it is possible to create a spectral index image such as the one in figure \ref{fig:p/l} with \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/spectral_image.py}{this script}. The white spots are due to invalid values in $\log(S_1/S_2)$ which are possibly due to misalignments in the phases of the two images. An improvement to the current script would be to add a mask around the sources because we don't need to image the noise's spectral index.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{p_l.png}
+    \caption{Spectral index image of P-band divided by L-band.}
+    \label{fig:p/l}
+\end{figure}
+
+\newpage
+
+% \printbibliography
+
+\end{document}
