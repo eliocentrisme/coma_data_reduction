@@ -40,6 +40,8 @@ flagdata(vis=f'{name}_hanning.ms', mode='extend')
 
 # plotms(vis=f'{name}_hanning.ms',xaxis='freq',yaxis='amp', ydatacolumn = 'corrected', antenna='ea02',correlation='XX,YY', field='3C286', plotrange=[0.2,0.5,0.0,100.0], coloraxis='spw', iteraxis='baseline')
 
+# INTERACTIVE: choose good channels in each spw with this plot
+plotms(vis=f'{name}_hanning.ms',antenna='ea02',xaxis='channel',yaxis='amp',iteraxis='spw')
 
 spw_chan = '0:55~65,1:55~65,2:25~30,3:60~70,4:55~65,5:85~95,6:75~85,7:55~65,8:50~60,9:100~110,10:55~65,11:70~80,12:90~100,13:90~100,14:60~70,15:55~65'
 
@@ -49,7 +51,8 @@ gaincal(vis=f'{name}_hanning.ms', caltable=f'{name}_hanning.K0', gaintype='K', s
 
 bandpass(vis=f'{name}_hanning.ms', caltable=f'{name}_hanning.B0', solint='inf', field='3C286',refant='ea25', minsnr=2.0, gaintable=[f'{name}_hanning.antpos',f'{name}_hanning.rq',f'{name}_hanning.tecim',f'{name}_hanning.G0',f'{name}_hanning.K0'])
 
-# plotms(vis=f'{name}_hanning.B0', xaxis='freq', yaxis='amp', iteraxis='antenna', coloraxis='spw')
+# INTERACTIVE: flag outliers
+plotms(vis=f'{name}_hanning.B0', xaxis='freq', yaxis='amp', iteraxis='antenna', coloraxis='spw')
 
 applycal(vis=f'{name}_hanning.ms', field='3C286', applymode='calflagstrict', gaintable=[f'{name}_hanning.antpos',f'{name}_hanning.rq',f'{name}_hanning.tecim',f'{name}_hanning.G0',f'{name}_hanning.K0',f'{name}_hanning.B0'] )
 
@@ -74,9 +77,8 @@ gaincal(vis=f'{name}_hanning.ms', caltable=f'{name}_hanning.K1', field='3C286', 
 plotms(vis=f'{name}_hanning.K1',xaxis='antenna1',yaxis='delay',plotrange=[0,30,-50.,50.])
 
 bandpass(vis=f'{name}_hanning.ms', caltable=f'{name}_hanning.B1', field='3C286', solint='inf', refant='ea27', minsnr=3.0, parang = True, gaintable=[f'{name}_hanning.antpos',f'{name}_hanning.tecim',f'{name}_hanning.rq',f'{name}_hanning.K1'], interp=['','','','nearest,nearestflag'])
-##########################################################################
-############### stop here for manual flagging of outlisers ###############
-##########################################################################
+
+# INTERACTIVE: flag outliers
 plotms(vis=f'{name}_hanning.B1', xaxis='freq', yaxis='amp', iteraxis='antenna', coloraxis='spw')
 
 plotms(vis=f'{name}_hanning.B1', xaxis='freq', yaxis='phase', iteraxis='antenna', plotrange=[0,0,-180.,180.], coloraxis='spw')
@@ -110,7 +112,9 @@ statwt(vis=f'coma_{name}_hanning.ms', datacolumn='data', timebin=30)
 ###################### SELF-CALIBRATION ########################
 ################################################################
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5000 5000 -scale 2.5asec -data-column DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_0 -niter 200000 coma_pbandB2_hanning.ms > selfcal_images/wsclean.log
+singularity_image = '~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif'
+
+singularity exec singularity_image wsclean -size 5000 5000 -scale 2.5asec -data-column DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_0 -niter 200000 coma_pbandB2_hanning.ms > selfcal_images/wsclean.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_0.cal', solint='inf', refant='ea27', gaintype='G', calmode='p')
 
@@ -118,7 +122,7 @@ gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_0.cal', sol
 
 applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_0.cal', calwt=False)
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5000 5000 -scale 2.5asec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_1 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc1.log
+singularity exec singularity_image wsclean -size 5000 5000 -scale 2.5asec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_1 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc1.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_1.cal', solint='300s', refant='ea27', gaintype='G', calmode='p')
 
@@ -126,7 +130,7 @@ gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_1.cal', sol
 
 applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_1.cal', calwt=False)
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_2 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc2.log
+singularity exec singularity_image wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_2 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc2.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_2.cal', solint='200s', refant='ea27', gaintype='G', calmode='p')
 
@@ -134,7 +138,7 @@ gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_2.cal', sol
 
 applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_2.cal', calwt=False)
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_3 -niter 200000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc3.log
+singularity exec singularity_image wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_3 -niter 200000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc3.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_3.cal', solint='100s', refant='ea27', gaintype='G', calmode='p')
 
@@ -144,7 +148,7 @@ flagdata(vis=f'coma_{name}_hanning.ms', mode='manual', spw='0')
 
 applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_3.cal', calwt=False)
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_4 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc4.log
+singularity exec singularity_image wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_4 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc4.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_4.cal', solint='80s', refant='ea27', gaintype='G', calmode='p')
 
@@ -154,7 +158,7 @@ applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_4.cal', c
 
 flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected', action='apply', display='report', flagbackup=True, combinescans=True, ntime='3600s')
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_5 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc5.log
+singularity exec singularity_image wsclean -size 5000 5000 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_5 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc5.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_5.cal', solint='60s', refant='ea27', gaintype='G', calmode='p')
 
@@ -164,7 +168,7 @@ applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_5.cal', c
 
 # flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected', action='apply', display='report', flagbackup=True, combinescans=True, ntime='3600s')
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_6 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc6.log
+singularity exec singularity_image wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs -0.5 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_6 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc6.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_6.cal', solint='30s', refant='ea27', gaintype='G', calmode='p')
 
@@ -174,7 +178,7 @@ applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_6.cal', c
 
 flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected', action='apply', display='report', flagbackup=True, combinescans=True, ntime='3600s')
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.0 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_7 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc7.log
+singularity exec singularity_image wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.0 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_7 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc7.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_7.cal', solint='10s', refant='ea27', gaintype='G', calmode='p')
 
@@ -187,7 +191,7 @@ applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_7.cal', c
 
 flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected-model', action='apply', display='report', flagbackup=True, combinescans=True, ntime='3600s')
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_8 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc8.log
+singularity exec singularity_image wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_8 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc8.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_8.cal', solint='int', refant='ea27', gaintype='G', calmode='p')
 
@@ -197,7 +201,7 @@ applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_8.cal', c
 
 flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected', action='apply', display='report', flagbackup=True, combinescans=True, ntime='3600s')
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_9 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc9.log
+singularity exec singularity_image wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_9 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc9.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_9.cal', solint='inf', refant='ea27', gaintype='G', calmode='ap', solnorm=True, gaintable=['selfcal/gains_cycle_8.cal'])
 
@@ -205,11 +209,11 @@ gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_9.cal', sol
 
 applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_9.cal', calwt=False)
 
-############ here kinda, then image alpha ##############
+############ restored flagversion after gains_cycle_8 and then created image coma_pbandB0704_alpha ##############
 
 flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected', action='apply', display='report', flagbackup=True, combinescans=True, ntime='3600s')
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_10 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc10.log
+singularity exec singularity_image wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_10 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc10.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_10.cal', solint='100s', refant='ea27', gaintype='G', calmode='ap', solnorm=True, gaintable=['selfcal/gains_cycle_8.cal'])
 
@@ -219,7 +223,7 @@ applycal(vis=f'coma_{name}_hanning.ms', gaintable='selfcal/gains_cycle_10.cal', 
 
 # flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected', action='apply', display='report', flagbackup=True, combinescans=True, ntime='3600s')
 
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_11 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc11.log
+singularity exec singularity_image wsclean -size 5100 5100 -scale 2.5arcsec -data-column CORRECTED_DATA -update-model-required -reorder -weight briggs 0.2 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name selfcal_images/selfcal_cycle_11 -niter 300000 coma_pbandB2_hanning.ms > selfcal_images/wsclean_sc11.log
 
 gaincal(vis=f'coma_{name}_hanning.ms', caltable='selfcal/gains_cycle_11.cal', solint='60s', refant='ea27', gaintype='G', calmode='ap'. solnorm=True, gaintable=['selfcal/gains_cycle_8.cal'])
 
@@ -231,4 +235,4 @@ flagdata(vis=f'coma_{name}_hanning.ms', mode='rflag', datacolumn='corrected', ac
 
 
 ######### for spectral index imaging #############
-singularity exec ~/privatemodules/flocs_v5.6.0_sandybridge_sandybridge.sif wsclean -size 5100 5100 -scale 2arcsec -data-column CORRECTED_DATA -no-update-model-required -beam-size 9arcsec -reorder -weight briggs 0.0 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name coma_pbandB0704_alpha -niter 300000 coma_pbandB2_hanning.ms > coma_pband0705_alpha.log
+singularity exec singularity_image wsclean -size 5100 5100 -scale 2arcsec -data-column CORRECTED_DATA -no-update-model-required -beam-size 9arcsec -reorder -weight briggs 0.0 -clean-border 1 -parallel-reordering 4 -gain 0.1 -mgain 0.7 -nmiter 30  -padding 1.4 -join-channels -channels-out 16 -local-rms -local-rms-strength 0.5 -auto-mask 3.0 -auto-threshold 0.5 -multiscale -multiscale-scale-bias 0.8 -multiscale-max-scales 7 -fit-spectral-pol 3 -pol i -gridder wgridder -fit-beam -dd-psf-grid 6 6 -parallel-deconvolution 2000 -name coma_pbandB0704_alpha -niter 300000 coma_pbandB2_hanning.ms > coma_pband0705_alpha.log
