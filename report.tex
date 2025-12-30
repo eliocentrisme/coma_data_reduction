@@ -108,7 +108,21 @@ The data is organized in frequency bands, then configuration and finally the dat
 .5 selfcal\_images.
 .5 coma\_lbandC0309\_alpha-MFS-*.fits \DTcomment{Final images. See next section for details.}.
 .5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-lband/carray/03.09/lbandC0309_selfcal.py}{lbandC0309\_selfcal.py} \DTcomment{Script used for the self-calibration.}.
-.3 darray \DTcomment{Empty.}.
+.3 darray.
+.4 03.30.
+.5 selfcal.
+.5 selfcal\_images.
+.5 coma\_lbandD0330.ms \DTcomment{This is the calibrated data for the target only.}.
+.5 coma\_lbandD0330shifted.ms \DTcomment{This is the calibrated data for the target only, shifted to J2000 12:54:11.712400 +27.37.30.465000}.
+.5 coma\_lbandD0330\_unshifted.ms \DTcomment{This is the calibrated data for the target only, shifted back to original coordinates. Other MS follow the same idea with 2,3,... indicating that I shifted back and forth between J2000 12:54:11.712400 +27.37.30.465000 and original coordinates}.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-lband/darray/03.30/lbandD0330_selfcal.py}{lbandD0330\_selfcal.py} \DTcomment{Script used for the self-calibration of this data.}.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-lband/darray/03.30/lbandD0330shifted_selfcal.py}{lbandD0330shifted\_selfcal.py} \DTcomment{Script used for the self-calibration of this data shifted to J2000 12:54:11.712400 +27.37.30.465000}.
+.4 04.15.
+.5 selfcal.
+.5 selfcal\_images.
+.5 \DTcomment{MS following same idea as for 03.30.}.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-lband/darray/04.15/lbandD0415_selfcal.py}{lbandD0415\_selfcal.py} \DTcomment{Script used for the self-calibration of this data.}.
+.5 \href{https://github.com/eliocentrisme/coma_data_reduction/blob/main/coma-lband/darray/04.15/lbandD0415shifted_selfcal.py}{lbandD0415shifted\_selfcal.py} \DTcomment{Script used for the self-calibration of this data shifted to J2000 12:54:11.712400 +27.37.30.465000}.
 .2 coma-pband \DTcomment{This directory contains all content associated to P-band data.}.
 .3 barray.
 .4 07.04.
@@ -167,11 +181,23 @@ The data is organized in frequency bands, then configuration and finally the dat
     \item \textbf{Remaining work}: Finish self-calibration and combine with the other epoch. As of August 1st, 2025, bandpass calibration should be done, but I didn't look at the image. 
 \end{itemize}
 
-\subsection{L-band D-configuration}
+\subsection{L-band D-configuration: 2021-03-30 and 2021-04-15}
 \begin{itemize}
-    \item Directory: \verb|./coma-lband/darray/|
-    \item \textbf{Remaining work}: Download the data, do calibration and self-calibration.
+    \item Directory: \verb|./coma-lband/darray/03.30| or \verb|./coma-lband/darray/04.15|
+    \item Calibration: VLA calibration pipeline.
+    \item Self-calibration: 5 cycles of phase calibration (inf, 300s, 200s, 100s); check if calibration tables look good.
+    \item Phase shift to J2000 12:54:11.712400 +27.37.30.465000 using phaseshift() and do a few cycles of self-calibration and check if bright source is properly deconvolved.
+    \item Phase shift back to original coordinates and finish self-calibration.
+    \item 
+    \item \textbf{Remaining work}: do self-calibration.
 \end{itemize}
+
+% \subsection{L-band D-configuration: 2021-04-15}
+% \begin{itemize}
+%     \item Directory: \verb|./coma-lband/darray/04.15|
+%     \item Calibration: VLA calibration pipeline.
+%     \item \textbf{Remaining work}: do self-calibration.
+% \end{itemize}
 
 \subsection{P-band B-configuration: 2020-07-04 and 2020-07-05}
 \begin{itemize}
